@@ -41,18 +41,30 @@ public class OrderService {
 
 
 
-    @RabbitListener(queues = "order")
+    @RabbitListener(queues = "postOrder")
     @SendTo("reply_queue")
-    public  String setOrder (String str,Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws IOException {
+    public  String postOrder (String str,Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws IOException {
         ObjectMapper objectMapper= new ObjectMapper();
         OrderEntity orderEntity=objectMapper.readValue(str,OrderEntity.class);
-        System.out.println("Got request "+ orderEntity);
-
-            orderEntity.setId(UUID.randomUUID());
+        System.out.println("Got request to post "+ orderEntity);
             orderRepository.save(orderEntity);
             channel.basicAck(tag,false);
-            System.out.println("Sent response ");
-            return str;
+            System.out.println("Sent response from post ");
+            return objectMapper.writeValueAsString(orderEntity);
+
+    }
+
+    @RabbitListener(queues = "updateOrder")
+    @SendTo("reply_queue")
+    public  String updateOrder (String str,Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws IOException {
+        ObjectMapper objectMapper= new ObjectMapper();
+        OrderEntity orderEntity=objectMapper.readValue(str,OrderEntity.class);
+        System.out.println("Got request to update"+ orderEntity);
+        orderRepository.deleteById(orderEntity.getId());
+        orderRepository.save(orderEntity);
+        channel.basicAck(tag,false);
+        System.out.println("Sent response from update ");
+        return objectMapper.writeValueAsString(orderEntity);
 
     }
 

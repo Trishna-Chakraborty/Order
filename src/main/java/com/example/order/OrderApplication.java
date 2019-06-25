@@ -16,12 +16,24 @@ public class OrderApplication {
 
 
     @Bean
-    Queue orderQueue() {
+    Queue postOrderQueue() {
 
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("x-dead-letter-exchange", "dead_exchange");
         args.put("x-message-ttl", 60000);
-        return new Queue("order", false, false, false, args);
+        //args.put("x-dead-letter-routing-key","post.#");
+        return new Queue("postOrder", false, false, false, args);
+    }
+
+
+    @Bean
+    Queue updateOrderQueue() {
+
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("x-dead-letter-exchange", "dead_exchange");
+        args.put("x-message-ttl", 60000);
+        //args.put("x-dead-letter-routing-key","post.#");
+        return new Queue("updateOrder", false, false, false, args);
     }
 
     @Bean
@@ -30,8 +42,12 @@ public class OrderApplication {
     }
 
     @Bean
-    Binding customerBinding(Queue orderQueue, DirectExchange orderExchange) {
-        return BindingBuilder.bind(orderQueue).to(orderExchange).with("");
+    Binding postOrderBinding(Queue postOrderQueue, DirectExchange orderExchange) {
+        return BindingBuilder.bind(postOrderQueue).to(orderExchange).with("post.order");
+    }
+    @Bean
+    Binding updateOrderBinding(Queue updateOrderQueue, DirectExchange orderExchange) {
+        return BindingBuilder.bind(updateOrderQueue).to(orderExchange).with("update.order");
     }
 
     public static void main(String[] args) {
