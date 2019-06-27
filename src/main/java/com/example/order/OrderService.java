@@ -60,7 +60,7 @@ public class OrderService {
         ObjectMapper objectMapper= new ObjectMapper();
         OrderEntity orderEntity=objectMapper.readValue(str,OrderEntity.class);
         System.out.println("Got request to update"+ orderEntity);
-        orderRepository.deleteById(orderEntity.getId());
+        //orderRepository.deleteById(orderEntity.getId());
         orderRepository.save(orderEntity);
         channel.basicAck(tag,false);
         System.out.println("Sent response from update ");
