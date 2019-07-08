@@ -48,7 +48,7 @@ public class OrderService {
         OrderEntity orderEntity=objectMapper.readValue(str,OrderEntity.class);
         System.out.println("Got request to post "+ orderEntity);
             orderRepository.save(orderEntity);
-            channel.basicAck(tag,false);
+            //channel.basicAck(tag,false);
             System.out.println("Sent response from post ");
             return objectMapper.writeValueAsString(orderEntity);
 
@@ -62,7 +62,7 @@ public class OrderService {
         System.out.println("Got request to update"+ orderEntity);
         //orderRepository.deleteById(orderEntity.getId());
         orderRepository.save(orderEntity);
-        channel.basicAck(tag,false);
+        //channel.basicAck(tag,false);
         System.out.println("Sent response from update ");
         return objectMapper.writeValueAsString(orderEntity);
 
