@@ -37,17 +37,34 @@ public class OrderApplication {
     }
 
     @Bean
+    Queue postTransactionQueue() {
+
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("x-dead-letter-exchange", "dead_exchange");
+        args.put("x-message-ttl", 60000);
+        //args.put("x-dead-letter-routing-key","post.#");
+        return new Queue("postTransaction", false, false, false, args);
+    }
+    @Bean
     DirectExchange orderExchange() {
         return new DirectExchange("order_exchange");
     }
+    @Bean
+    DirectExchange transactionExchange() {
+        return new DirectExchange("transaction_exchange");
+    }
 
     @Bean
-    Binding postOrderBinding(Queue postOrderQueue, DirectExchange orderExchange) {
-        return BindingBuilder.bind(postOrderQueue).to(orderExchange).with("post.order");
+    Binding postTransactionBinding(Queue postTransactionQueue, DirectExchange transactionExchange) {
+        return BindingBuilder.bind(postTransactionQueue).to(transactionExchange).with("post.transaction");
     }
     @Bean
     Binding updateOrderBinding(Queue updateOrderQueue, DirectExchange orderExchange) {
         return BindingBuilder.bind(updateOrderQueue).to(orderExchange).with("update.order");
+    }
+    @Bean
+    Binding postOrderBinding(Queue postOrderQueue, DirectExchange orderExchange) {
+        return BindingBuilder.bind(postOrderQueue).to(orderExchange).with("post.order");
     }
 
     public static void main(String[] args) {

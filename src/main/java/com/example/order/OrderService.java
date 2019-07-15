@@ -20,6 +20,8 @@ public class OrderService {
     @Autowired
     OrderRepository orderRepository;
 
+    @Autowired
+    TransactionRepository transactionRepository;
 
 
   /*  @RabbitListener(queues = "order")
@@ -65,6 +67,21 @@ public class OrderService {
         //channel.basicAck(tag,false);
         System.out.println("Sent response from update ");
         return objectMapper.writeValueAsString(orderEntity);
+
+    }
+
+
+    @RabbitListener(queues = "postTransaction")
+    @SendTo("reply_queue")
+    public  String postTransaction (String str,Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws IOException {
+        ObjectMapper objectMapper= new ObjectMapper();
+        Transaction transaction=objectMapper.readValue(str,Transaction.class);
+        System.out.println("Got request to update"+ transaction);
+        //orderRepository.deleteById(orderEntity.getId());
+        transactionRepository.save(transaction);
+        //channel.basicAck(tag,false);
+        System.out.println("Sent response from post ");
+        return objectMapper.writeValueAsString(transaction);
 
     }
 
